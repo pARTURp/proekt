@@ -1,0 +1,32 @@
+body{
+    margin: 0;
+    padding: 0;
+    background-color: rgb(29, 29, 29);
+    display: flex;
+    align-items: center;
+}
+
+header {
+    padding: 0;
+    margin: 0;
+    width: 1360px;
+    height: 100px;
+    background-color: rgb(29, 29, 29);
+    border-bottom: 2px solid rgb(70, 70, 70);
+}
+
+header h1 {
+    color: rgb(116, 116, 116);
+}
+
+.icons .main_item {
+    margin: 5px;
+    width: 200px;
+    height: 150px;
+    border-radius: 20px;
+}
+
+.icons .main_item:hover {
+    width: 220px;
+    height: 170px;
+}
