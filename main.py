@@ -44,7 +44,9 @@ def game1():
 
     font.init()
     my_font = font.Font(None, 100)
+    FONT = font.Font(None, 36)
     win_text = my_font.render('Победа', 0, (100, 255, 0))
+    text = FONT.render('Нажми R для перезапуска ESC для выхода', 0, (255, 255, 255))
 
     # -------------------- ИНИЦИАЛИЗАЦИЯ ЭКРАНА --------------------
     window = display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -150,9 +152,11 @@ def game1():
                 goalf.move_goal()
             elif sprite.collide_rect(player, goalf1):
                 goalf1.move_goal()
-            elif sprite.collide_rect(player, goalt):
-                window.blit(win_text, (200, 100))
-                finish = True
+        if sprite.collide_rect(player, goalt):
+            window.blit(win_text, (230, 200))
+            finish = True
+            window.blit(text, (100, 300))
+
 
         player.show()
         enemy.show()
@@ -274,8 +278,8 @@ def game2():
             elif some_event.type == KEYDOWN and finish:
                 if some_event.key == K_r:
                     finish = False
-                    player.rect.x = 20
-                    player.rect.y = 400
+                    player.rect.x = 300
+                    player.rect.y = 250
                     enemys.empty()
                     score = 0
                     spawn_timer = 0
@@ -357,7 +361,8 @@ def game3():
     FPS = 100
 
     font.init()
-    FONT = font.Font(None, 36)
+    my_font = font.Font(None, 36)
+    text = my_font.render('Нажми R для перезапуска ESC для выхода', 0, (255, 255, 255))
 
     screen = display.set_mode((WIDTH, HEIGHT))
     clock = time.Clock()
@@ -475,6 +480,13 @@ def game3():
                         f.write(str(score))
                 quit()
             elif e.type == KEYDOWN:
+                if e.key == K_r and finish:
+                    finish = False
+                    player.rect.center = (WIDTH // 2, HEIGHT // 2)
+                    enemys.empty()
+                    bullets.empty()
+                    score = 0
+                    spawn_timer = 0
                 if e.key == K_ESCAPE:
                     # Сохраняем рекорд при выходе в меню
                     if score > record:
@@ -522,6 +534,7 @@ def game3():
             # Проверка столкновений врагов с игроком
             if sprite.spritecollide(player, enemys, False):
                 finish = True
+                screen.blit(text, (100, 300))
                 if score > record:
                     record = score
                     with open(record_file, 'w') as f:
@@ -536,10 +549,6 @@ def game3():
 
             info_text = FONT.render("Пробел - стрелять, ESC - выйти", True, WHITE)
             screen.blit(info_text, info_text.get_rect(center=(WIDTH // 2, 20)))
-
-        else:
-            lose_text = FONT.render("Поражение! Нажми ESC для выхода", True, WHITE)
-            screen.blit(lose_text, lose_text.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
 
         display.flip()
 
