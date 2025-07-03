@@ -128,13 +128,24 @@ def game1():
         return g1, g2, g3
 
     # -------------------- СОЗДАНИЕ СПРАЙТОВ --------------------
-    player = Player(20, 400, 50, 50, 4, 'player_game1.png')
-    enemy = Enemy(300, 300, 50, 50, 2.4, 'enemy_game1.png')
+    player = Player(0, 450, 50, 50, 4, 'player_game1.png')
+    enemy = Enemy(300, 300, 50, 50, 1.4, 'enemy_game1.png')
     goalf1, goalf, goalt = create_goals()
 
     # -------------------- СТЕНЫ --------------------
-    walls = []
+    walls = [                                       #справо от игрока
+        Wall(x=615, y=130, width=15, height=400), #вертикальная правая стена
+        Wall(x=0, y=420, width=530, height=15), #горизонтальная нижняя стена
+        Wall(x=230, y=340, width=300, height=15), #горизонтальная стена выше
+        Wall(x=515, y=240, width=15, height=100), #вертикальная стена выше
 
+        Wall(x=80, y=60, width=700, height=15), #самая верхняя стена
+        Wall(x=230, y=125, width=15, height=215), #вертикальная стена сверху второй гор. стены
+        Wall(x=130, y=190, width=15, height=160),
+        Wall(x=0, y=190, width=140, height=15),
+    ]
+
+    
     # -------------------- ИГРОВОЙ ЦИКЛ --------------------
     while True:
         window.blit(background, (0, 0))
@@ -143,10 +154,11 @@ def game1():
             enemy.move_towards_player(player)
 
             if sprite.collide_rect(player, enemy):
-                player.rect.x = 50
-                player.rect.y = 400
+                player.rect.x = 0
+                player.rect.y = 450
                 enemy.rect.x = rd(0, 500)
                 enemy.rect.y = rd(0, 500)
+                goalf1, goalf, goalt = create_goals()
 
             if sprite.collide_rect(player, goalf):
                 goalf.move_goal()
@@ -156,8 +168,8 @@ def game1():
             window.blit(win_text, (230, 200))
             finish = True
             window.blit(text, (100, 300))
-
-
+        pos = mouse.get_pos()
+        print(pos)
         player.show()
         enemy.show()
         goalf1.show()
@@ -175,8 +187,8 @@ def game1():
                     return
                 elif finish and e.key == K_r:
                     finish = False
-                    player.rect.x = 20
-                    player.rect.y = 400
+                    player.rect.x = 0
+                    player.rect.y = 450
                     goalf1, goalf, goalt = create_goals()
 
         display.flip()
@@ -295,8 +307,8 @@ def game2():
             if spawn_timer >= spawn_interval:
                 spawn_timer = 0
                 side = random.choice(['left', 'right', 'top', 'bottom'])
-                speed = random.randint(5, 10)
-                enemy = Enemy(0, 0, 60, 40, 0, 'enemy_game2.png')
+                speed = random.randint(3, 5)
+                enemy = Enemy(0, 0, 80, 60, 0, 'enemy_game2.png')
 
                 if side == 'left':
                     enemy.rect.x = -enemy.rect.width
@@ -381,7 +393,7 @@ def game3():
     class Player(sprite.Sprite):
         def __init__(self, x, y, img_path):
             super().__init__()
-            self.original_image = transform.scale(image.load(img_path), (50, 100))
+            self.original_image = transform.scale(image.load(img_path), (30, 70))
             self.image = self.original_image
             self.rect = self.image.get_rect(center=(x, y))
             self.speed = 5
