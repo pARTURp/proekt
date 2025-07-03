@@ -34,11 +34,11 @@ class Button:
 def game1():
     from random import randint as rd, shuffle
     # -------------------- НАСТРОЙКИ ИГРЫ --------------------
-    WINDOW_TITLE = 'Лабиринт'
     WINDOW_WIDTH = 700
     WINDOW_HEIGHT = 500
     WINDOW_BACKGROUND = 'background_game1.jpg'
     FPS = 100
+    display.set_caption("лабиринт")
 
     finish = False
 
@@ -50,7 +50,6 @@ def game1():
 
     # -------------------- ИНИЦИАЛИЗАЦИЯ ЭКРАНА --------------------
     window = display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    display.set_caption(WINDOW_TITLE)
     background = transform.scale(image.load(WINDOW_BACKGROUND), (WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = time.Clock()
 
@@ -184,6 +183,7 @@ def game1():
                 quit()
             if e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
+                    display.set_caption("Меню с 3 мини-играми")
                     return
                 elif finish and e.key == K_r:
                     finish = False
@@ -198,10 +198,10 @@ def game1():
 
 def game2():
     # -------------------- НАСТРОЙКИ ИГРЫ --------------------
-    WINDOW_TITLE = 'Лабиринт'
     WINDOW_WIDTH = 700
     WINDOW_HEIGHT = 500
     WINDOW_BACKGROUND = 'background_game1.jpg'
+    display.set_caption("андртейл на минималках")
 
     FPS = 100
     finish = False
@@ -215,7 +215,6 @@ def game2():
 
     # -------------------- ИНИЦИАЛИЗАЦИЯ ЭКРАНА --------------------
     window = display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    display.set_caption(WINDOW_TITLE)
     background = transform.scale(image.load(WINDOW_BACKGROUND), (WINDOW_WIDTH, WINDOW_HEIGHT))
     clock = time.Clock()
 
@@ -377,6 +376,7 @@ def game3():
     text = my_font.render('Нажми R для перезапуска ESC для выхода', 0, (255, 255, 255))
 
     screen = display.set_mode((WIDTH, HEIGHT))
+    display.set_caption("шутер")
     clock = time.Clock()
 
     # Загрузка рекорда из файла
@@ -569,6 +569,7 @@ def quit_game():
     exit()
 
 def main_menu():
+    display.set_caption("Меню с 3 мини-играми")
     buttons = [
         Button("Мини-игра 1", (WIDTH//2, HEIGHT//2 - 110)),
         Button("Мини-игра 2", (WIDTH//2, HEIGHT//2 - 40)),
