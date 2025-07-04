@@ -417,10 +417,13 @@ def game3():
     WIDTH, HEIGHT = 700, 500
     WHITE = (255, 255, 255)
     FPS = 100
+    WINDOW_BACKGROUND = 'background_game1.jpg'
 
     font.init()
     my_font = font.Font(None, 36)
+    FONT = font.Font(None, 36)
     text = my_font.render('Нажми R для перезапуска ESC для выхода', 0, (255, 255, 255))
+    background = transform.scale(image.load(WINDOW_BACKGROUND), (WIDTH, HEIGHT))
 
     screen = display.set_mode((WIDTH, HEIGHT))
     display.set_caption("шутер")
@@ -460,7 +463,7 @@ def game3():
             mx, my = mouse.get_pos()
             dx = mx - self.rect.centerx
             dy = my - self.rect.centery
-            angle = math.degrees(math.atan2(-dy, dx)) - 90  # -90 чтобы "вверх" был 0 градусов
+            angle = math.degrees(math.atan2(-dy, dx)) - 90
             self.image = transform.rotate(self.original_image, angle)
             self.rect = self.image.get_rect(center=self.rect.center)
 
@@ -500,7 +503,6 @@ def game3():
         def __init__(self, x, y, dx, dy, img_path):
             super().__init__()
             self.image = transform.scale(image.load(img_path), (20, 40))
-            # Повернем пулю по направлению полёта
             angle = math.degrees(math.atan2(-dy, dx)) - 90
             self.image = transform.rotate(self.image, angle)
             self.rect = self.image.get_rect(center=(x, y))
@@ -511,7 +513,6 @@ def game3():
         def update(self):
             self.rect.x += self.dx * self.speed
             self.rect.y += self.dy * self.speed
-            # Удаляем пулю если вышла за экран
             if (self.rect.right < 0 or self.rect.left > WIDTH or
                 self.rect.bottom < 0 or self.rect.top > HEIGHT):
                 self.kill()
@@ -522,7 +523,7 @@ def game3():
     bullets = sprite.Group()
 
     spawn_timer = 0
-    spawn_interval = 250  # миллисекунд
+    spawn_interval = 250
 
     finish = False
     score = 0
@@ -533,7 +534,6 @@ def game3():
 
         for e in event.get():
             if e.type == QUIT:
-                # Сохраняем рекорд при выходе
                 if score > record:
                     with open(record_file, 'w') as f:
                         f.write(str(score))
@@ -547,7 +547,6 @@ def game3():
                     score = 0
                     spawn_timer = 0
                 if e.key == K_ESCAPE:
-                    # Сохраняем рекорд при выходе в меню
                     display.set_caption("Меню с 3 мини-играми")
                     if score > record:
                         with open(record_file, 'w') as f:
@@ -557,9 +556,8 @@ def game3():
                     player.fire()
 
         if not finish:
-            screen.fill((50, 50, 150))
+            screen.blit(background, (0, 0))
 
-            # Спавн врагов с рандомной стороны
             if spawn_timer >= spawn_interval:
                 spawn_timer = 0
                 side = random.choice(['left', 'right', 'top', 'bottom'])
@@ -572,7 +570,7 @@ def game3():
                 elif side == 'top':
                     x = random.randint(0, WIDTH)
                     y = -30
-                else:  # bottom
+                else:
                     x = random.randint(0, WIDTH)
                     y = HEIGHT + 30
 
@@ -587,11 +585,9 @@ def game3():
             enemys.draw(screen)
             bullets.draw(screen)
 
-            # Проверка столкновений пули с врагами
             hits = sprite.groupcollide(bullets, enemys, True, True)
             score += len(hits)
 
-            # Проверка столкновений врагов с игроком
             if sprite.spritecollide(player, enemys, False):
                 finish = True
                 screen.blit(text, (100, 300))
@@ -600,7 +596,6 @@ def game3():
                     with open(record_file, 'w') as f:
                         f.write(str(record))
 
-            # Отображение счёта и рекорда
             score_text = FONT.render(f'Счет: {score}', True, WHITE)
             screen.blit(score_text, (10, 10))
 
@@ -611,6 +606,7 @@ def game3():
             screen.blit(info_text, info_text.get_rect(center=(WIDTH // 2, 20)))
 
         display.flip()
+
 
 def quit_game():
     quit()
