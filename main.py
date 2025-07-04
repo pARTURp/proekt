@@ -167,8 +167,6 @@ def game1():
             window.blit(win_text, (230, 200))
             finish = True
             window.blit(text, (100, 300))
-        pos = mouse.get_pos()
-        print(pos)
         player.show()
         enemy.show()
         goalf1.show()
@@ -190,6 +188,8 @@ def game1():
                     player.rect.x = 0
                     player.rect.y = 450
                     goalf1, goalf, goalt = create_goals()
+                    enemy.rect.x = rd(0, 500)
+                    enemy.rect.y = rd(0, 500)
 
         display.flip()
         clock.tick(FPS)
@@ -205,6 +205,7 @@ def game2():
 
     FPS = 100
     finish = False
+    paused = False  # Для паузы при открытии инвентаря
 
     font.init()
     my_font = font.Font(None, 150)
@@ -230,6 +231,48 @@ def game2():
         record = 0
 
     score = 0
+    health = 100
+
+    inventory = {
+        "Золотое яблоко": 1,
+        "Пирог": 1,
+        "Снег": 1
+    }
+
+    def open_inventory():
+        nonlocal paused, health
+        paused = True
+        inventory_font = font.Font(None, 36)
+        inventory_font_small = font.Font(None, 34)
+        while paused:
+            window.blit(background, (0, 0))
+            inv_text = inventory_font.render("ИНВЕНТАРЬ", True, (255, 255, 255))
+            window.blit(inv_text, (180, 30))
+            y = 150
+            for idx, (item, count) in enumerate(inventory.items()):
+                text = small_font.render(f"{idx+1}. {item} ({count})", True, (255, 255, 255))
+                window.blit(text, (100, y))
+                y += 40
+            hint = inventory_font_small.render("Нажми 1-3, чтобы использовать предмет. ESC - закрыть.", True, (255, 255, 255))
+            window.blit(hint, (10, 400))
+            display.update()
+
+            for e in event.get():
+                if e.type == KEYDOWN:
+                    if e.key == K_ESCAPE:
+                        paused = False
+                    elif e.key == K_1 and inventory["Золотое яблоко"] > 0:
+                        health = min(100, health + 60)
+                        inventory["Золотое яблоко"] -= 1
+                        paused = False
+                    elif e.key == K_2 and inventory["Пирог"] > 0:
+                        health = min(100, health + 30)
+                        inventory["Пирог"] -= 1
+                        paused = False
+                    elif e.key == K_3 and inventory["Снег"] > 0:
+                        health = min(100, health + 10)
+                        inventory["Снег"] -= 1
+                        paused = False
 
     # -------------------- КЛАССЫ --------------------
     class GameSprite(sprite.Sprite):
@@ -262,7 +305,6 @@ def game2():
         def update(self):
             self.rect.x += self.vel_x
             self.rect.y += self.vel_y
-            # Удалить врага, если он вышел за пределы экрана
             if (self.rect.right < 0 or self.rect.left > WINDOW_WIDTH or
                 self.rect.bottom < 0 or self.rect.top > WINDOW_HEIGHT):
                 self.kill()
@@ -270,39 +312,42 @@ def game2():
     # -------------------- СПРАЙТЫ --------------------
     player = Player(x=300, y=250, width=57, height=70, speed=5, img_path='player_game2.png')
     player_group = sprite.Group(player)
-
     enemys = sprite.Group()
 
-    # Таймер появления врагов
     spawn_timer = 0
-    spawn_interval = 500  # 0.5 секунды
+    spawn_interval = 500
 
     # -------------------- ОСНОВНОЙ ЦИКЛ --------------------
     while True:
         dt = clock.tick(FPS)
-        spawn_timer += dt
+        if not paused:
+            spawn_timer += dt
 
         for some_event in event.get():
             if some_event.type == QUIT:
                 quit()
                 return
-            elif some_event.type == KEYDOWN and finish:
-                if some_event.key == K_r:
-                    finish = False
-                    player.rect.x = 300
-                    player.rect.y = 250
-                    enemys.empty()
-                    score = 0
-                    spawn_timer = 0
+            elif some_event.type == KEYDOWN:
+                if finish:
+                    if some_event.key == K_r:
+                        finish = False
+                        health = 100
+                        player.rect.x = 300
+                        player.rect.y = 250
+                        enemys.empty()
+                        score = 0
+                        spawn_timer = 0
+                    elif some_event.key == K_ESCAPE:
+                        return
                 elif some_event.key == K_ESCAPE:
+                    display.set_caption("Меню с 3 мини-играми")
                     return
-            elif some_event.type == KEYDOWN and some_event.key == K_ESCAPE:
-                return
+                elif some_event.key == K_LCTRL:
+                    open_inventory()
 
-        if not finish:
+        if not finish and not paused:
             window.blit(background, (0, 0))
 
-            # Появление нового врага
             if spawn_timer >= spawn_interval:
                 spawn_timer = 0
                 side = random.choice(['left', 'right', 'top', 'bottom'])
@@ -324,44 +369,46 @@ def game2():
                     enemy.rect.y = -enemy.rect.height
                     enemy.vel_x = 0
                     enemy.vel_y = speed
-                else:  # bottom
+                else:
                     enemy.rect.x = random.randint(0, WINDOW_WIDTH - enemy.rect.width)
                     enemy.rect.y = WINDOW_HEIGHT
                     enemy.vel_x = 0
                     enemy.vel_y = -speed
 
                 enemys.add(enemy)
-                score += 1  # увеличиваем счет при добавлении врага
+                score += 1
 
-            # Обновление
             player_group.update()
             enemys.update()
 
-            # Отрисовка
             player_group.draw(window)
             enemys.draw(window)
 
-            # Отображение счета и рекорда
             score_text = small_font.render(f"Счет: {score}", True, (255, 255, 255))
             record_text = small_font.render(f"Рекорд: {record}", True, (255, 255, 0))
+            health_text = small_font.render(f"Здоровье: {health}/100", True, (255, 0, 0))
+
             window.blit(score_text, (10, 10))
             window.blit(record_text, (10, 40))
+            window.blit(health_text, (10, 70))
 
-            # Проверка столкновений
-            if sprite.spritecollide(player, enemys, False):
-                window.blit(lose_text, (50, 200))
-                finish = True
-                # Сохранение рекорда
-                if score > record:
-                    record = score
-                    with open(record_file, "w") as f:
-                        f.write(str(record))
-        else:
-            # При поражении выводим подсказку для перезапуска
+            if sprite.spritecollide(player, enemys, True):
+                damage = random.randint(10, 30)
+                health -= damage
+                if health <= 0:
+                    health = 0
+                    window.blit(lose_text, (50, 200))
+                    finish = True
+                    if score > record:
+                        record = score
+                        with open(record_file, "w") as f:
+                            f.write(str(record))
+        elif finish:
             hint = small_font.render("Нажми R для перезапуска или ESC для выхода", True, (255, 255, 255))
             window.blit(hint, (50, 350))
 
         display.update()
+
 
 
 
@@ -501,6 +548,7 @@ def game3():
                     spawn_timer = 0
                 if e.key == K_ESCAPE:
                     # Сохраняем рекорд при выходе в меню
+                    display.set_caption("Меню с 3 мини-играми")
                     if score > record:
                         with open(record_file, 'w') as f:
                             f.write(str(score))
@@ -571,9 +619,9 @@ def quit_game():
 def main_menu():
     display.set_caption("Меню с 3 мини-играми")
     buttons = [
-        Button("Мини-игра 1", (WIDTH//2, HEIGHT//2 - 110)),
-        Button("Мини-игра 2", (WIDTH//2, HEIGHT//2 - 40)),
-        Button("Мини-игра 3", (WIDTH//2, HEIGHT//2 + 30)),
+        Button("лабиринт", (WIDTH//2, HEIGHT//2 - 110)),
+        Button("андртейл", (WIDTH//2, HEIGHT//2 - 40)),
+        Button("стрелялка", (WIDTH//2, HEIGHT//2 + 30)),
         Button("Выход", (WIDTH//2, HEIGHT//2 + 100)),
     ]
 
